@@ -1,6 +1,6 @@
 {
   "name": "vault-org",
-  "version": "0.1.0",
-  "description": "Five-phase framework for discovering, analyzing, and restructuring Obsidian vaults. Vault-agnostic, plugin-aware, produces skill-compatible artifacts for downstream tools.",
+  "version": "0.2.0",
+  "description": "Six-phase framework for discovering, analyzing, interviewing, and restructuring Obsidian vaults. Vault-agnostic, plugin-aware, produces skill-compatible artifacts for downstream tools.",
   "skills": ["./skills/"]
 }
