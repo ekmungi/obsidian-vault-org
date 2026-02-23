@@ -3,18 +3,20 @@ name: propose
 description: >
   Proposes vault improvements step by step, with user approval at each stage.
   Use when user says "propose changes", "fix my vault", "suggest improvements",
-  or after running vault-org:analyze. Requires an analysis report as input.
-  Produces an approved proposal that feeds into vault-org:spec.
+  or after running vault-org:interview. Requires a target model and analysis report
+  as input. Produces an approved proposal that feeds into vault-org:spec.
 user_invocable: true
 ---
 
 # Vault Proposals
 
-Walks the user through proposed improvements one at a time. Nothing is recorded without explicit user approval.
+Walks the user through proposed improvements one at a time. Nothing is recorded without explicit user approval. Proposals are guided by the user's target model -- they address the user's priorities first, not just best-practice violations.
 
 ## Prerequisites
 
-An analysis report must exist (produced by `vault-org:analyze`). Look for `analysis-{vault-name}.md` in the working directory. If not found, tell the user to run `vault-org:analyze` first.
+A target model must exist (produced by `vault-org:interview`). Look for `target-model-{vault-name}.md` in the working directory. If not found, tell the user to run `vault-org:interview` first.
+
+An analysis report must also exist (produced by `vault-org:analyze`). Look for `analysis-{vault-name}.md`. Both documents inform proposals: the target model sets direction, the analysis provides the specific issues.
 
 ## Proposal Workflow
 
