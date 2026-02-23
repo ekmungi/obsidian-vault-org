@@ -1,6 +1,6 @@
 # vault-org
 
-A Claude Code plugin that walks you through organizing any Obsidian vault in five phases. It maps what you have, identifies problems, proposes fixes (you approve each one), records the target design, and then applies the changes -- all step by step, nothing without your say-so.
+A Claude Code plugin that walks you through organizing any Obsidian vault in six phases. It maps what you have, identifies problems, interviews you to understand what you want, proposes fixes aligned with your goals (you approve each one), records the target design, and then applies the changes -- all step by step, nothing without your say-so.
 
 The final output is a machine-readable vault spec that other Claude Code plugins can consume. For example, a personal assistant plugin can read the spec to know where your meeting notes live, what frontmatter fields to expect, and which folders to search.
 
@@ -21,13 +21,13 @@ Open any project in Claude Code (it does not have to be the vault itself) and ru
 vault-org:discover
 ```
 
-Claude will ask for your vault path, then map everything. From there, follow the five phases in order.
+Claude will ask for your vault path, then map everything. From there, follow the six phases in order.
 
-## The Five Phases
+## The Six Phases
 
 ```
-vault-org:discover  -->  vault-org:analyze  -->  vault-org:propose  -->  vault-org:spec  -->  vault-org:execute
-     (map)                (problems)              (approve fixes)        (record plan)        (apply changes)
+vault-org:discover --> vault-org:analyze --> vault-org:interview --> vault-org:propose --> vault-org:spec --> vault-org:execute
+     (map)             (problems)             (goals)               (approve fixes)      (record plan)      (apply changes)
 ```
 
 Each phase produces a Markdown file that feeds into the next. You can stop at any phase and pick up later -- the artifacts persist in your working directory.
@@ -87,7 +87,7 @@ Scan my Obsidian vault and tell me what's in it
 
 ## Phase 2: Analysis
 
-**What it does**: Reads the discovery report and evaluates your vault against best practices. Identifies structural problems, metadata inconsistencies, plugin redundancies, template gaps, and database opportunities. Adapts based on which plugins you have installed.
+**What it does**: Reads the discovery report and evaluates your vault against best practices, one area at a time. Presents findings after each assessment area so you can review and comment before moving on. Adapts based on which plugins you have installed.
 
 **Prerequisite**: You must have run `vault-org:discover` first. The `discovery-MyVault.md` file must be in your working directory.
 
@@ -97,14 +97,29 @@ Scan my Obsidian vault and tell me what's in it
 vault-org:analyze
 ```
 
-**What you get back**: A prioritized assessment with severity ratings:
+**What the conversation looks like**: Claude works through five assessment areas sequentially:
 
-- **Summary**: Top 3-5 issues ranked by impact
-- **Structural issues**: Folder depth problems, misplaced files, naming inconsistencies
-- **Metadata issues**: Missing frontmatter, mixed date formats, orphaned tags
-- **Plugin recommendations**: What to add, remove, or reconfigure
-- **Template gaps**: Note types that lack templates
-- **Database opportunities**: Collections that would benefit from structured views
+1. **Structural assessment** -- folder depth, naming, orphaned folders
+2. **Metadata consistency** -- frontmatter gaps, format mismatches
+3. **Plugin redundancy and gaps** -- overlaps, unused plugins, missing capabilities
+4. **Template coverage** -- note types without templates, quality issues
+5. **Database assessment** -- .base integrity, query patterns (if applicable)
+
+After each area, Claude presents what it found and pauses:
+
+```
+Structural Assessment:
+
+| Issue | Severity | Affected |
+|-------|----------|----------|
+| Mixed naming conventions | Medium | 01 PROJECTS/, 03 RESOURCES/ |
+| 4 folders nested 4+ levels | Low | 01 PROJECTS/Jeeves/... |
+| 12 empty folders | Low | Various |
+
+Any thoughts on these findings before I move to the next area?
+```
+
+You can comment ("the deep nesting is intentional") or say "continue" to move on. Your comments are captured in the final report.
 
 **Output file**: `analysis-MyVault.md`
 
@@ -126,11 +141,72 @@ What's wrong with my vault?
 
 ---
 
-## Phase 3: Proposal
+## Phase 3: Interview
 
-**What it does**: Walks through each issue from the analysis and proposes a fix. You see every proposal one at a time and choose: approve, modify, or skip. Nothing is recorded without your explicit approval.
+**What it does**: Has an open-ended conversation with you to understand what you want your vault to be. Uses the analysis findings as context, but you drive the conversation. Produces a target model that tells the proposal phase what to aim for.
 
-**Prerequisite**: You must have run `vault-org:analyze` first.
+**Prerequisite**: You must have run `vault-org:analyze` first. The `analysis-MyVault.md` file must be in your working directory.
+
+**Invoke it**:
+
+```
+vault-org:interview
+```
+
+**What the conversation looks like**: Claude starts with broad, open-ended questions and follows your thread:
+
+```
+Walk me through how you use your vault day to day. What does a typical session look like?
+```
+
+You talk about your workflow. Claude listens, probes deeper, and occasionally connects your answers to analysis findings:
+
+```
+You mentioned you struggle finding meeting notes. The analysis found that meeting
+notes are spread across 4 different folders with no consistent naming. Is that the
+problem you are describing?
+```
+
+After 5-10 exchanges, Claude synthesizes what it heard:
+
+```
+So it sounds like:
+- You primarily use the vault for work (meetings, projects, research)
+- Meeting notes and project tracking work okay
+- The main pain point is research notes -- they have no home and you can't find them later
+- You'd like a simple capture workflow that files things automatically
+- The deep folder nesting in Projects is intentional and you want to keep it
+
+Does this capture it? Anything I'm missing or got wrong?
+```
+
+You confirm or correct, and Claude writes the target model.
+
+**Output file**: `target-model-MyVault.md`
+
+**Example prompt variations**:
+
+```
+vault-org:interview
+```
+
+```
+Interview me about my vault
+```
+
+```
+Help me define what I want my vault to look like
+```
+
+**Key difference from analysis**: The analysis tells you what is wrong according to best practices. The interview discovers what matters to you. Sometimes those overlap. Sometimes they don't -- you might be fine with something the analysis flagged. The interview captures that.
+
+---
+
+## Phase 4: Proposal
+
+**What it does**: Walks through each issue from the analysis and proposes a fix, guided by your target model from the interview. You see every proposal one at a time and choose: approve, modify, or skip. Nothing is recorded without your explicit approval.
+
+**Prerequisite**: You must have run `vault-org:interview` first. Both `target-model-MyVault.md` and `analysis-MyVault.md` must be in your working directory.
 
 **Invoke it**:
 
@@ -140,7 +216,7 @@ vault-org:propose
 
 **What the conversation looks like**:
 
-Claude presents proposals in order -- structural changes first, then metadata, templates, plugins, health fixes, and databases.
+Claude presents proposals in order -- structural changes first, then metadata, templates, plugins, health fixes, and databases. Proposals address your priorities (from the interview) first.
 
 For a folder restructure, you see a before/after comparison:
 
@@ -246,9 +322,9 @@ What should I fix? Walk me through it.
 
 ---
 
-## Phase 4: Target State
+## Phase 5: Target State
 
-**What it does**: Takes everything you approved in Phase 3 and produces three artifacts: a decision log, a vault spec, and a migration plan.
+**What it does**: Takes everything you approved in Phase 4 and produces three artifacts: a decision log, a vault spec, and a migration plan.
 
 **Prerequisite**: You must have run `vault-org:propose` first.
 
@@ -359,7 +435,7 @@ Finalize the plan from what I approved
 
 ---
 
-## Phase 5: Execution
+## Phase 6: Execution
 
 **What it does**: Follows the migration plan step by step, applying each change to your actual vault. Every action is shown to you before it happens. You confirm each one.
 
@@ -455,17 +531,18 @@ Execute the migration plan
 
 ## Artifacts Summary
 
-After running all five phases, you have these files in your working directory:
+After running all six phases, you have these files in your working directory:
 
 | File | Phase | Purpose |
 |------|-------|---------|
 | `discovery-MyVault.md` | 1 | Complete vault map |
 | `analysis-MyVault.md` | 2 | Problems and recommendations |
-| `proposal-MyVault.md` | 3 | User-approved changes |
-| `decisions-MyVault.md` | 4 | Decision log |
-| `spec-MyVault.md` | 4 | Target state (primary output for downstream tools) |
-| `migration-MyVault.md` | 4 | Ordered execution steps |
-| `execution-MyVault.md` | 5 | Log of what was done |
+| `target-model-MyVault.md` | 3 | What the user wants (interview output) |
+| `proposal-MyVault.md` | 4 | User-approved changes |
+| `decisions-MyVault.md` | 5 | Decision log |
+| `spec-MyVault.md` | 5 | Target state (primary output for downstream tools) |
+| `migration-MyVault.md` | 5 | Ordered execution steps |
+| `execution-MyVault.md` | 6 | Log of what was done |
 
 ## Using the Vault Spec with Other Plugins
 
@@ -503,10 +580,11 @@ This produces `discovery-Personal.md` and `discovery-Enterprise.md`. Continue th
 .claude-plugin/           Plugin manifest
 skills/
   ├── discover/SKILL.md   Phase 1: Map the vault
-  ├── analyze/SKILL.md    Phase 2: Identify problems
-  ├── propose/SKILL.md    Phase 3: Propose fixes (user approves)
-  ├── spec/SKILL.md       Phase 4: Record target state
-  └── execute/SKILL.md    Phase 5: Apply changes
+  ├── analyze/SKILL.md    Phase 2: Identify problems (step by step)
+  ├── interview/SKILL.md  Phase 3: Understand user goals
+  ├── propose/SKILL.md    Phase 4: Propose fixes (user approves)
+  ├── spec/SKILL.md       Phase 5: Record target state
+  └── execute/SKILL.md    Phase 6: Apply changes
 references/               Framework documentation
 examples/                 Example outputs from a real vault audit
 ```
