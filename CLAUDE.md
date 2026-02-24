@@ -4,7 +4,7 @@
 
 A standalone Claude Code plugin for discovering, analyzing, and restructuring Obsidian vaults. Runs independently -- no dependencies on other plugins. Produces standardized vault specs that downstream tools can consume.
 
-## Six Skills
+## Seven Skills
 
 | Skill | Phase | What It Does |
 |-------|-------|-------------|
@@ -14,8 +14,10 @@ A standalone Claude Code plugin for discovering, analyzing, and restructuring Ob
 | `vault-org:propose` | 4. Proposal | Suggests improvements guided by target model, user approves each |
 | `vault-org:spec` | 5. Target State | Records approved decisions, writes vault spec and migration plan |
 | `vault-org:execute` | 6. Execution | Applies changes to the vault, user confirms each action |
+| `vault-org:migrate` | 7. Migration | Imports content from Notion (or other PKMs) via phased batch migration with human review |
 
-Skills are sequential: each phase produces an artifact consumed by the next.
+The first six skills are sequential: each phase produces an artifact consumed by the next.
+`vault-org:migrate` is a standalone import skill — use it after execute to populate the vault with content from external databases.
 
 ## Vault-Agnostic
 
