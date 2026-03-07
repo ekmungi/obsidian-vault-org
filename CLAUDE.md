@@ -1,5 +1,12 @@
 # vault-org
 
+## Plugin Priority
+
+| Layer | Skills |
+|-------|--------|
+| Primary | plugin-dev: skill-development, agent-development, hook-development, plugin-structure |
+| Secondary | superpowers: writing-plans, TDD, verification, code-review |
+
 ## What This Is
 
 A standalone Claude Code plugin for discovering, analyzing, and restructuring Obsidian vaults. Runs independently -- no dependencies on other plugins. Produces standardized vault specs that downstream tools can consume.
